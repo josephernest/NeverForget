@@ -55,7 +55,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             int len = GetWindowTextLengthA(hwndEdit);
             std::vector<char> text(len+1);
             GetWindowTextA(hwndEdit, &text[0], len);
-            std::ofstream file("myfile.txt");
+            std::ofstream file("neverforget.txt");
             file.write(&text[0], len);
             file.close();
             PostQuitMessage(0);

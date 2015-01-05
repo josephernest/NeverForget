@@ -3,7 +3,7 @@ NeverForget
 
 Easiest sticky notes app possible. Always there on your desktop, never forget anything anymore!
 
-![screenshot](http://gget.it/rm8b9h2o/test.jpg)
+![screenshot](http://gget.it/7uqmaoj6/6.jpg)
 
 About
 ----
