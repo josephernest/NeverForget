@@ -34,12 +34,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
     RECT rect;
     HWND hwndTaskbar = FindWindow(L"Shell_traywnd", NULL);
     GetWindowRect(hwndTaskbar, &rect);
-    //HWND hwndDesktop = FindWindow(L"WorkerW", NULL);
-    //hwndMain = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_LAYERED, wc.lpszClassName, 0, WS_CHILD | WS_VISIBLE | WS_SYSMENU, rect.right - 300, 3 * rect.top / 4, 300, rect.top / 4, hwndDesktop, 0, 0, 0);    
     hwndMain = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_LAYERED, wc.lpszClassName, 0, WS_POPUP | WS_VISIBLE | WS_SYSMENU, rect.right - 300, 3 * rect.top / 4, 300, rect.top / 4, 0, 0, 0, 0);
     hwndEdit = CreateWindowEx(0, L"EDIT", NULL, WS_CHILD | WS_VISIBLE | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL, 0, 0, 300, rect.top / 4, hwndMain, 0, (HINSTANCE) GetWindowLong(hwndMain, GWL_HINSTANCE), NULL);
     SetLayeredWindowAttributes(hwndMain, 0, 192, LWA_ALPHA);
     ShowWindow(hwndMain, nCmdShow);
+
+    HWND hwndOwner = GetWindow(GetWindow(GetTopWindow(0), GW_HWNDLAST), GW_CHILD);   // makes the main window part of the desktop
+    SetWindowLong(hwndMain, GWL_HWNDPARENT, (LONG) hwndOwner);      
 
     SetWindowSubclass(hwndEdit, (SUBCLASSPROC) EditWndProc, 0, 1);
 
