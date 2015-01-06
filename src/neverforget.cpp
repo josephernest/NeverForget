@@ -1,11 +1,15 @@
+// compile with: cl neverforget.cpp
+
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "gdi32.lib")
+#pragma comment(lib, "comctl32.lib")
 
 #ifndef UNICODE 
 #define UNICODE
 #endif 
 
 #include <windows.h>
+#include <commctrl.h>
 
 #include <string>
 #include <fstream>
@@ -13,6 +17,7 @@
 #include <vector>
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK EditWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwrefData);
 
 HWND hwndMain = NULL;
 HWND hwndEdit = NULL;
@@ -35,6 +40,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
     hwndEdit = CreateWindowEx(0, L"EDIT", NULL, WS_CHILD | WS_VISIBLE | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL, 0, 0, 300, rect.top / 4, hwndMain, 0, (HINSTANCE) GetWindowLong(hwndMain, GWL_HINSTANCE), NULL);
     SetLayeredWindowAttributes(hwndMain, 0, 192, LWA_ALPHA);
     ShowWindow(hwndMain, nCmdShow);
+
+    SetWindowSubclass(hwndEdit, (SUBCLASSPROC) EditWndProc, 0, 1);
 
     std::ifstream t("neverforget.txt", std::ios::in  | std::ios::binary);
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
@@ -65,9 +72,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
-        case WM_COMMAND:
+        case WM_COMMAND:              
         {
-            if (HIWORD(wParam) == EN_CHANGE) 
+            if (HIWORD(wParam) == EN_CHANGE)      // if textbox has changed
             { 
                 Serialize();
             }
@@ -95,4 +102,20 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+LRESULT CALLBACK EditWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwrefData)
+{
+    switch(message)
+    {
+        case WM_KEYDOWN:
+        {
+            if (wParam=='A' && (::GetKeyState(VK_CONTROL) & 0x8000)!=0)       // CTRL+A for "select all"
+            {
+                SendMessage(hwndEdit, EM_SETSEL, 0, -1);
+                return 0;
+            }
+        }
+    }
+    return DefSubclassProc(hwnd, message, wParam, lParam);
 }
