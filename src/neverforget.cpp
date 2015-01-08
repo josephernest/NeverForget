@@ -50,7 +50,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
     SendMessageA(hwndEdit, WM_SETTEXT, 0, (LPARAM) str.c_str()); 
 
     MSG msg = { };
-    while (GetMessage(&msg, NULL, 0, 0))
+    while (GetMessage(&msg, NULL, 0, 0) > 0)
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
@@ -83,11 +83,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
 
         case WM_DESTROY:
-        case WM_CLOSE:
-        case WM_QUIT:
-        case WM_ENDSESSION:
         {
-            Serialize();
+            //Serialize();
             PostQuitMessage(0);
             return 0;
         } 
