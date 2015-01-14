@@ -40,7 +40,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
     ShowWindow(hwndMain, nCmdShow);
 
     HWND hwndOwner = GetWindow(GetWindow(GetTopWindow(0), GW_HWNDLAST), GW_CHILD);   // makes the main window part of the desktop
-    SetWindowLong(hwndMain, GWL_HWNDPARENT, (LONG) hwndOwner);      
+    SetWindowLong(hwndMain, GWL_HWNDPARENT, (LONG) hwndOwner);                       // note : as a child of desktop now, the main window won't receive WM_QUERYENDSESSION
+    HWND hwndDummy = CreateWindowEx(NULL, wc.lpszClassName, 0, WS_POPUP, 0, 0, 1, 1, 0, 0, 0, 0); // thus this dummy top-level window to catch WM_QUERYENDSESSION
 
     SetWindowSubclass(hwndEdit, (SUBCLASSPROC) EditWndProc, 0, 1);
 
@@ -82,9 +83,14 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             return 0;
         }
 
+        case WM_QUERYENDSESSION:
+        {
+            SetWindowLong(hwndMain, GWL_HWNDPARENT, (LONG) NULL);        
+            return TRUE;        
+        }
+
         case WM_DESTROY:
         {
-            //Serialize();
             PostQuitMessage(0);
             return 0;
         } 
