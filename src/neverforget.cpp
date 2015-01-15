@@ -21,6 +21,7 @@ LRESULT CALLBACK EditWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 
 HWND hwndMain = NULL;
 HWND hwndEdit = NULL;
+HWND hwndDummy = NULL;
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow)
 {
@@ -41,7 +42,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
     HWND hwndOwner = GetWindow(GetWindow(GetTopWindow(0), GW_HWNDLAST), GW_CHILD);   // makes the main window part of the desktop
     SetWindowLong(hwndMain, GWL_HWNDPARENT, (LONG) hwndOwner);                       // note : as a child of desktop now, the main window won't receive WM_QUERYENDSESSION
-    HWND hwndDummy = CreateWindowEx(NULL, wc.lpszClassName, 0, WS_POPUP, 0, 0, 1, 1, 0, 0, 0, 0); // thus this dummy top-level window to catch WM_QUERYENDSESSION
+    hwndDummy = CreateWindowEx(NULL, wc.lpszClassName, 0, WS_POPUP, 0, 0, 1, 1, 0, 0, 0, 0); // thus this dummy top-level window to catch WM_QUERYENDSESSION
 
     SetWindowSubclass(hwndEdit, (SUBCLASSPROC) EditWndProc, 0, 1);
 
@@ -72,37 +73,42 @@ void Serialize()
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    switch (uMsg)
+    if (hwnd == hwndDummy)
     {
-        case WM_COMMAND:              
-        {
-            if (HIWORD(wParam) == EN_CHANGE)      // if textbox has changed
-            { 
-                Serialize();
-            }
-            return 0;
-        }
-
-        case WM_QUERYENDSESSION:
+        if (uMsg == WM_QUERYENDSESSION)
         {
             SetWindowLong(hwndMain, GWL_HWNDPARENT, (LONG) NULL);        
             return TRUE;        
         }
-
-        case WM_DESTROY:
+    }
+    else
+    {
+        switch (uMsg)
         {
-            PostQuitMessage(0);
-            return 0;
-        } 
+            case WM_COMMAND:              
+            {
+                if (HIWORD(wParam) == EN_CHANGE)      // if textbox has changed
+                { 
+                    Serialize();
+                }
+                return 0;
+            }
 
-        case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hwnd, &ps);
-            HBRUSH hBrush = CreateSolidBrush(RGB(255,255,255));
-            FillRect(hdc, &ps.rcPaint, hBrush);
-            EndPaint(hwnd, &ps);
-            return 0;            
+            case WM_DESTROY:
+            {
+                PostQuitMessage(0);
+                return 0;
+            } 
+
+            case WM_PAINT:
+            {
+                PAINTSTRUCT ps;
+                HDC hdc = BeginPaint(hwnd, &ps);
+                HBRUSH hBrush = CreateSolidBrush(RGB(255,255,255));
+                FillRect(hdc, &ps.rcPaint, hBrush);
+                EndPaint(hwnd, &ps);
+                return 0;            
+            }
         }
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
